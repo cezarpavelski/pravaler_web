@@ -1,0 +1,43 @@
+version: '3.4'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    networks:
+      - frontend
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/app.conf:/etc/nginx/conf.d/app.conf
+      - ./docker/nginx/logs:/var/log/nginx/
+    depends_on:
+      - app
+
+  app:
+    build: ./docker/php
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb
+    ports:
+      - "3306:3306"
+    networks:
+      - backend
+    volumes:
+      - ./docker/db/data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_USER=pravaler
+      - MYSQL_PASSWORD=secret
+      - MYSQL_DATABASE=pravaler
+
+networks:
+  backend:
+  frontend:
